@@ -21,28 +21,44 @@ const startY = ref(0);
 const initialX = ref(0);
 const initialY = ref(0);
 const initialRotation = ref(0);
+const grabOffsetX = ref(0);
+const grabOffsetY = ref(0);
 
 const handleDragStart = (e: MouseEvent | TouchEvent) => {
   if (isRotating.value) return;
   isDragging.value = true;
   const event = 'touches' in e ? e.touches[0] : e;
-  startX.value = event.clientX;
-  startY.value = event.clientY;
-  initialX.value = props.lamp.x;
-  initialY.value = props.lamp.y;
+  
+  // Store the offset between cursor and lamp position
+  grabOffsetX.value = event.clientX - props.lamp.x;
+  grabOffsetY.value = event.clientY - props.lamp.y;
+
+  // Add document-level event listeners
+  document.addEventListener('mousemove', handleDragMove);
+  document.addEventListener('mouseup', handleDragEnd);
+  document.addEventListener('touchmove', handleDragMove);
+  document.addEventListener('touchend', handleDragEnd);
 };
 
 const handleDragMove = (e: MouseEvent | TouchEvent) => {
   if (!isDragging.value) return;
   e.preventDefault();
   const event = 'touches' in e ? e.touches[0] : e;
-  const deltaX = event.clientX - startX.value;
-  const deltaY = event.clientY - startY.value;
-  emit('update:position', initialX.value + deltaX, initialY.value + deltaY);
+  
+  // Use absolute cursor position and subtract the initial grab offset
+  const newX = event.clientX - grabOffsetX.value;
+  const newY = event.clientY - grabOffsetY.value;
+  
+  emit('update:position', newX, newY);
 };
 
 const handleDragEnd = () => {
   isDragging.value = false;
+  // Remove document-level event listeners
+  document.removeEventListener('mousemove', handleDragMove);
+  document.removeEventListener('mouseup', handleDragEnd);
+  document.removeEventListener('touchmove', handleDragMove);
+  document.removeEventListener('touchend', handleDragEnd);
 };
 
 const handleRotateStart = (e: MouseEvent | TouchEvent) => {
@@ -96,15 +112,10 @@ const handleNameChange = (event: Event) => {
       cursor: isDragging ? 'grabbing' : isRotating ? 'grabbing' : 'grab'
     }"
     @mousedown="handleDragStart"
-    @mousemove="handleDragMove"
-    @mouseup="handleDragEnd"
-    @mouseleave="handleDragEnd"
     @touchstart="handleDragStart"
-    @touchmove="handleDragMove"
-    @touchend="handleDragEnd"
   >
     <div 
-      class="w-24 h-5 bg-yellow-200 rounded-lg shadow-lg border-2 border-yellow-700"
+      class="w-40 h-5 bg-yellow-200 rounded-lg shadow-lg border-2 border-yellow-700"
       :style="{
         position: 'relative',
         transformOrigin: 'center',
