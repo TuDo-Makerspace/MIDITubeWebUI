@@ -70,7 +70,7 @@ const handleRotateMove = (e: MouseEvent | TouchEvent) => {
   const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
   
   // Update rotation with reduced sensitivity (divided by 2)
-  emit('update:rotation', (initialRotation.value + angle/2) % 360);
+  emit('update:rotation', (initialRotation.value + angle/3) % 360);
 };
 
 const handleRotateEnd = () => {
@@ -104,7 +104,7 @@ const handleNameChange = (event: Event) => {
     @touchend="handleDragEnd"
   >
     <div 
-      class="w-24 h-8 bg-yellow-400 rounded-lg shadow-lg" 
+      class="w-24 h-5 bg-yellow-200 rounded-lg shadow-lg border-2 border-yellow-700"
       :style="{
         position: 'relative',
         transformOrigin: 'center',
@@ -126,6 +126,10 @@ const handleNameChange = (event: Event) => {
           font-size: 9px;
           color: #666;
           margin: 0 2px;
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
         ">{{ lamp.name }}</nobr>
                 <button
           style="
